@@ -1,0 +1,46 @@
+version: '3.5'
+
+services:
+  backend_database:
+    image: postgres:12.2-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
+    volumes:
+      - database_volume:/var/lib/postgresql/data
+      - ./postgresql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - backend_network
+
+  backend:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    ports:
+      - "3434:80"
+    depends_on:
+      - backend_database
+    networks:
+      - backend_network
+    volumes:
+      # Update this to wherever you want VS Code to mount the folder of your project
+      - ..:/app:cached
+      # Uncomment the next line to use Docker from inside the container. See https://aka.ms/vscode-remote/samples/docker-from-docker-compose for details.
+      # - /var/run/docker.sock:/var/run/docker.sock 
+
+      # Uncomment the next four lines if you will use a ptrace-based debugger like C++, Go, and Rust.
+      # cap_add:
+      #   - SYS_PTRACE
+      # security_opt:
+      #   - seccomp:unconfined
+
+      # Overrides default command so things don't shut down after the process ends.
+    command: /bin/sh -c "while sleep 1000; do :; done"
+networks:
+  backend_network:
+    name: backend_network
+volumes:
+  database_volume:

@@ -1,0 +1,43 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IntelliJ stuff:
+.idea/
+
+# Invoices
+invoices/
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# logs:
+log/
+
+# application specific
+docker-compose.yml
+
+# build data
+app/static/\.sass-cache/
+app/static/\.webassets-cache/
+app/static/gen/
+
+# vs code
+/.vscode
+/.devcontainer
+
+secrets
+
+.style.yapf
+
+/.git
+/.pytest_cache
