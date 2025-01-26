@@ -1,5 +1,0 @@
-
-# dev
-toml
-pylint_flask_sqlalchemy
-pylint_flask

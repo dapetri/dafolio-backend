@@ -15,7 +15,7 @@ env.bak/
 venv.bak/
 
 # logs:
-log/
+logs/
 
 # build data
 app/static/\.sass-cache/
@@ -32,3 +32,4 @@ secrets
 dist
 
 config.toml
+.env
