@@ -1,12 +1,15 @@
 import os
-from flask import Flask, request
+from flask import Flask, jsonify, request
 import requests
 from loguru import logger
 from src.models import Location, db
+from flask_cors import CORS
 
 logger.add("logs/app.log", rotation="500 MB", level="INFO")
 
 app = Flask(__name__)
+CORS(app) 
+
 app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}/{os.getenv('POSTGRES_DB')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -46,3 +49,32 @@ def process_client_meta():
         logger.error(f"IPGeolocation API error: {response.status_code} - {response.text}")
             
     return "Thank you!", 200
+
+
+@app.route("/locations")
+def get_locations():
+    try:
+        locations = Location.query.all()
+        
+        features = []
+        for location in locations:
+            if location.latitude and location.longitude:
+                feature = {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [float(location.longitude), float(location.latitude)]
+                    },
+                }
+                features.append(feature)
+
+        geojson = {
+            "type": "FeatureCollection",
+            "features": features
+        }
+
+        return jsonify(geojson)
+
+    except Exception as e:
+        logger.error(f"Error getting locations: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
