@@ -5,6 +5,8 @@ from loguru import logger
 from src.models import Location, db
 from flask_cors import CORS
 
+from src.utils import restrict_to_local_network
+
 logger.add("logs/app.log", rotation="500 MB", level="INFO")
 
 app = Flask(__name__)
@@ -21,6 +23,7 @@ with app.app_context():
 
 
 @app.route("/")
+@restrict_to_local_network
 def process_client_meta():
     client_ip = request.headers.get("X-Forwarded-For", request.remote_addr)
     response = requests.get(
@@ -59,6 +62,7 @@ def process_client_meta():
 
 
 @app.route("/locations", methods=["GET", "POST"])
+@restrict_to_local_network
 def locations():
     if request.method == "GET":
         return get_locations()
