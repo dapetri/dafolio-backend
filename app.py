@@ -10,7 +10,7 @@ from src.utils import restrict_to_local_network
 logger.add("logs/app.log", rotation="500 MB", level="INFO")
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000", "https://dapetri.com"])
+CORS(app)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = (
     f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}/{os.getenv('POSTGRES_DB')}"
@@ -23,7 +23,6 @@ with app.app_context():
 
 
 @app.route("/")
-@restrict_to_local_network
 def process_client_meta():
     client_ip = request.headers.get("X-Forwarded-For", request.remote_addr)
     response = requests.get(
@@ -62,13 +61,13 @@ def process_client_meta():
 
 
 @app.route("/locations", methods=["GET", "POST"])
-@restrict_to_local_network
 def locations():
     if request.method == "GET":
         return get_locations()
     elif request.method == "POST":
         return add_location()
-        
+
+
 def get_locations():
     try:
         locations = Location.query.all()
