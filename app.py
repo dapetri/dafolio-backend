@@ -5,12 +5,11 @@ from loguru import logger
 from src.models import Location, db
 from flask_cors import CORS
 
-from src.utils import restrict_to_local_network
 
 logger.add("logs/app.log", rotation="500 MB", level="INFO")
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=os.getenv("CORS_ORIGINS").split(","))
 
 app.config["SQLALCHEMY_DATABASE_URI"] = (
     f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}/{os.getenv('POSTGRES_DB')}"
