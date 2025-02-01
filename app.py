@@ -23,7 +23,7 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
-with open('res/forbidden_locations.json') as f:
+with open('src/res/forbidden_locations.json') as f:
     forbidden_locations = [(loc["lat"], loc["lng"]) for loc in json.load(f)["forbidden_locations"]]
 
 @app.route("/")
