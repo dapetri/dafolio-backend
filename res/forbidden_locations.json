@@ -1,0 +1,19 @@
+{
+    "forbidden_locations": [
+        {
+            "name": "Brugna",
+            "lat": 44.558,
+            "lng": 10.527
+        },
+        {
+            "name": "Bolo",
+            "lat": 44.459,
+            "lng": 11.370
+        },
+        {
+            "name": "HD",
+            "lat": 49.432,
+            "lng": 8.680
+        }
+    ]
+}

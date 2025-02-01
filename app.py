@@ -1,9 +1,12 @@
+import json
 import os
 from flask import Flask, jsonify, request
 import requests
 from loguru import logger
 from src.models import Location, db
 from flask_cors import CORS
+
+from src.utils import haversine
 
 
 logger.add("logs/app.log", rotation="500 MB", level="INFO")
@@ -20,6 +23,8 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
+with open('res/forbidden_locations.json') as f:
+    forbidden_locations = [(loc["lat"], loc["lng"]) for loc in json.load(f)["forbidden_locations"]]
 
 @app.route("/")
 def process_client_meta():
@@ -70,21 +75,18 @@ def locations():
 def get_locations():
     try:
         locations = Location.query.all()
+        lat_lng = set([(loc.latitude, loc.longitude) for loc in locations if all([haversine(lat, lng, loc.latitude, loc.longitude) > 500  for lat, lng in forbidden_locations])])
 
-        features = []
-        for location in locations:
-            if location.latitude and location.longitude:
-                feature = {
+        features =                [{
                     "type": "Feature",
                     "geometry": {
                         "type": "Point",
                         "coordinates": [
-                            float(location.longitude),
-                            float(location.latitude),
+                            float(lng),
+                            float(lat),
                         ],
                     },
-                }
-                features.append(feature)
+                } for lat, lng in lat_lng]
 
         geojson = {"type": "FeatureCollection", "features": features}
 
