@@ -1,30 +1,31 @@
 import json
 import os
-from flask import Flask, jsonify, request
+from collections import Counter
+
 import requests
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 from loguru import logger
 from src.models import Location, db
-from flask_cors import CORS
-
 from src.utils import haversine
-
 
 logger.add("logs/app.log", rotation="500 MB", level="INFO")
 
 app = Flask(__name__)
 CORS(app, origins=os.getenv("CORS_ORIGINS").split(","))
 
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-    f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}/{os.getenv('POSTGRES_DB')}"
-)
+app.config[
+    "SQLALCHEMY_DATABASE_URI"
+] = f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}/{os.getenv('POSTGRES_DB')}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
 with app.app_context():
     db.create_all()
 
-with open('src/res/forbidden_locations.json') as f:
+with open("src/res/forbidden_locations.json") as f:
     forbidden_locations = [(loc["lat"], loc["lng"]) for loc in json.load(f)["forbidden_locations"]]
+
 
 @app.route("/")
 def process_client_meta():
@@ -57,9 +58,7 @@ def process_client_meta():
             db.session.rollback()
 
     else:
-        logger.error(
-            f"IPGeolocation API error: {response.status_code} - {response.text}"
-        )
+        logger.error(f"IPGeolocation API error: {response.status_code} - {response.text}")
 
     return "Thank you!", 200
 
@@ -75,18 +74,28 @@ def locations():
 def get_locations():
     try:
         locations = Location.query.all()
-        lat_lng = set([(loc.latitude, loc.longitude) for loc in locations if all([haversine(lat, lng, loc.latitude, loc.longitude) > 500  for lat, lng in forbidden_locations])])
+        lat_lng_cnts = Counter(
+            [
+                (loc.latitude, loc.longitude)
+                for loc in locations
+                if all([haversine(lat, lng, loc.latitude, loc.longitude) > 500 for lat, lng in forbidden_locations])
+            ]
+        )
 
-        features =                [{
-                    "type": "Feature",
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [
-                            float(lng),
-                            float(lat),
-                        ],
-                    },
-                } for lat, lng in lat_lng]
+        features = [
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                        float(lng),
+                        float(lat),
+                    ],
+                },
+                "properties": {"count": cnt},
+            }
+            for (lat, lng), cnt in lat_lng_cnts.items()
+        ]
 
         geojson = {"type": "FeatureCollection", "features": features}
 

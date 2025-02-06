@@ -1,10 +1,10 @@
 from flask_sqlalchemy import SQLAlchemy
 
-
 db = SQLAlchemy()
 
+
 class Location(db.Model):
-    __tablename__ = 'locations'
+    __tablename__ = "locations"
     id = db.Column(db.Integer, primary_key=True)
     ip = db.Column(db.String(15), nullable=False)
     continent_code = db.Column(db.String(2))

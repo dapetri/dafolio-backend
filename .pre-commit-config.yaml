@@ -3,7 +3,7 @@ repos:
     rev: 23.3.0  # Use the latest stable version of black
     hooks:
       - id: black
-        language_version: python3.8  # Adjust this to your project's Python version
+        language_version: python3.10  # Adjust this to your project's Python version
         args: ["--line-length", "120"]
 
   - repo: https://github.com/pre-commit/mirrors-isort
@@ -11,4 +11,4 @@ repos:
     hooks:
       - id: isort
         args: ['--profile', 'black', '--line-length', '120', '--src-path', 'eventorga-backend-admin-api,eventorga-backend-public-api,eventorga-backend-core']  # Ensures isort and black are compatible
-        language_version: python3.8  # Adjust this to your project's Python version
+        language_version: python3.10  # Adjust this to your project's Python version
